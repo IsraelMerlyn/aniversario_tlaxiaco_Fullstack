@@ -53,7 +53,13 @@ export const registroSchema = z.object({
         .max(7, "Solo puedes cargar un máximo de 7 imágenes"),
 });
 
-export type RegistroFormImageItem = z.infer<typeof registroImageItemSchema>;
-export type RegistroFormExistingImage = z.infer<typeof existingImageItemSchema>;
-export type RegistroFormValues = z.infer<typeof registroSchema>;
+export type RegistroFormInput = z.input<typeof registroSchema>;
+export type RegistroFormValues = z.output<typeof registroSchema>;
+
+export type RegistroFormImageItem = RegistroFormValues["imagenes"][number];
+export type RegistroFormExistingImage = Extract<
+    RegistroFormValues["imagenes"][number],
+    { kind: "existing" }
+>;
+
 export type RegistroSubmitStatus = "draft" | "pending" | "approved" | "rejected";

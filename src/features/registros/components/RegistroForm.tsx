@@ -1,13 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
-
+import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { useForm, type SubmitHandler } from "react-hook-form";
+
 import { QrPreview } from "../../../shared/components/QrPreview";
 import { ImageUploader } from "./ImageUploader";
 import {
   registroSchema,
+  type RegistroFormInput,
   type RegistroFormValues,
   type RegistroSubmitStatus,
 } from "../schemas/registro.schema";
@@ -31,7 +32,7 @@ type RegistroFormProps = {
   ) => Promise<void> | void;
 };
 
-function getDefaultValues(): RegistroFormValues {
+function getDefaultValues(): RegistroFormInput {
   return {
     anio: new Date().getFullYear(),
     descripcion: "",
@@ -67,6 +68,11 @@ export function RegistroForm({
     submitActions[0]?.status ?? "draft"
   );
 
+  const resolvedInitialValues = useMemo<RegistroFormInput>(
+    () => initialValues ?? getDefaultValues(),
+    [initialValues]
+  );
+
   const {
     register,
     handleSubmit,
@@ -74,20 +80,16 @@ export function RegistroForm({
     setValue,
     reset,
     formState: { errors },
-  } = useForm<RegistroFormValues>({
+  } = useForm<RegistroFormInput, unknown, RegistroFormValues>({
     resolver: zodResolver(registroSchema),
-    defaultValues: getDefaultValues(),
+    defaultValues: resolvedInitialValues,
   });
 
   useEffect(() => {
-    if (initialValues) {
-      reset(initialValues);
-    } else {
-      reset(getDefaultValues());
-    }
-  }, [initialValues, reset]);
+    reset(resolvedInitialValues);
+  }, [resolvedInitialValues, reset]);
 
-  const imagenes = watch("imagenes");
+  const imagenes = watch("imagenes") ?? [];
   const anio = watch("anio");
   const descripcion = watch("descripcion");
   const anioPublicacion = watch("anio_publicacion");
@@ -107,7 +109,7 @@ export function RegistroForm({
   const handleAddFiles = (newFiles: File[]) => {
     const currentFiles = watch("imagenes") ?? [];
 
-    const mappedNewFiles = newFiles.map((file) => ({
+    const mappedNewFiles: RegistroFormInput["imagenes"] = newFiles.map((file) => ({
       kind: "new" as const,
       clientId: crypto.randomUUID(),
       file,
@@ -138,9 +140,9 @@ export function RegistroForm({
     });
   };
 
-const submitHandler: SubmitHandler<RegistroFormValues> = async (values) => {
-  await onSubmit(values, submitMode);
-};
+  const submitHandler: SubmitHandler<RegistroFormValues> = async (values) => {
+    await onSubmit(values, submitMode);
+  };
 
   return (
     <form onSubmit={handleSubmit(submitHandler)} className="d-flex flex-column gap-4">
