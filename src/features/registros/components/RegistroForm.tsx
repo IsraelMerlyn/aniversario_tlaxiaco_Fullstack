@@ -8,7 +8,6 @@ import { QrPreview } from "../../../shared/components/QrPreview";
 import { ImageUploader } from "./ImageUploader";
 import {
   registroSchema,
-  type RegistroFormInput,
   type RegistroFormValues,
   type RegistroSubmitStatus,
 } from "../schemas/registro.schema";
@@ -32,7 +31,7 @@ type RegistroFormProps = {
   ) => Promise<void> | void;
 };
 
-function getDefaultValues(): RegistroFormInput {
+function getDefaultValues(): RegistroFormValues {
   return {
     anio: new Date().getFullYear(),
     descripcion: "",
@@ -75,8 +74,9 @@ export function RegistroForm({
     setValue,
     reset,
     formState: { errors },
-  } = useForm<RegistroFormInput>({
-    resolver: zodResolver(registroSchema),
+  } = useForm<RegistroFormValues>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver(registroSchema) as any,
     defaultValues: getDefaultValues(),
   });
 
@@ -88,10 +88,10 @@ export function RegistroForm({
     }
   }, [initialValues, reset]);
 
-  const imagenes = watch("imagenes") as RegistroFormValues["imagenes"];
-  const anio = watch("anio") as number;
+  const imagenes = watch("imagenes");
+  const anio = watch("anio");
   const descripcion = watch("descripcion");
-  const anioPublicacion = watch("anio_publicacion") as number;
+  const anioPublicacion = watch("anio_publicacion");
 
   const qrPreviewUrl = useMemo(() => {
     if (fixedQrValue) return fixedQrValue;
@@ -139,9 +139,9 @@ export function RegistroForm({
     });
   };
 
-const submitHandler: SubmitHandler<RegistroFormInput> = async (values) => {
-  await onSubmit(values as RegistroFormValues, submitMode);
-};
+  const submitHandler: SubmitHandler<RegistroFormValues> = async (values) => {
+    await onSubmit(values, submitMode);
+  };
 
   return (
     <form onSubmit={handleSubmit(submitHandler)} className="d-flex flex-column gap-4">
