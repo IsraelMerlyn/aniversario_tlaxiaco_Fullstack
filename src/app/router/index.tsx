@@ -1,5 +1,7 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import { AppLayout } from "../layout/AppLayout";
+import { ProtectedRoute } from "../../features/auth/components/ProtectedRoute";
+import { LoginPage } from "../../features/auth/pages/LoginPage";
 import { RegistrosListPage } from "../../features/registros/pages/RegistrosListPage";
 import { RegistroCreatePage } from "../../features/registros/pages/RegistroCreatePage";
 import { RegistroEditPage } from "../../features/registros/pages/RegistroEditPage";
@@ -9,15 +11,24 @@ import { PublicRegistroPage } from "../../features/aprobaciones/pages/PublicRegi
 
 export const router = createBrowserRouter([
   {
-    path: "/",
-    element: <AppLayout />,
+    path: "/login",
+    element: <LoginPage />,
+  },
+  {
+    element: <ProtectedRoute />,
     children: [
-      { index: true, element: <Navigate to="/registros" replace /> },
-      { path: "registros", element: <RegistrosListPage /> },
-      { path: "registros/nuevo", element: <RegistroCreatePage /> },
-      { path: "registros/:id/editar", element: <RegistroEditPage /> },
-      { path: "aprobaciones", element: <AprobacionesListPage /> },
-      { path: "aprobaciones/:id", element: <AprobacionDetailPage /> },
+      {
+        path: "/",
+        element: <AppLayout />,
+        children: [
+          { index: true, element: <Navigate to="/registros" replace /> },
+          { path: "registros", element: <RegistrosListPage /> },
+          { path: "registros/nuevo", element: <RegistroCreatePage /> },
+          { path: "registros/:id/editar", element: <RegistroEditPage /> },
+          { path: "aprobaciones", element: <AprobacionesListPage /> },
+          { path: "aprobaciones/:id", element: <AprobacionDetailPage /> },
+        ],
+      },
     ],
   },
   {

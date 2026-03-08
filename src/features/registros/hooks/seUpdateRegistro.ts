@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 import { updateRegistro } from "../services/update-registro.service";
+import { appToast } from "../../../shared/utils/toast";
 
 export function useUpdateRegistro() {
     const queryClient = useQueryClient();
@@ -10,10 +10,10 @@ export function useUpdateRegistro() {
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: ["registros"] });
             queryClient.invalidateQueries({ queryKey: ["registro", variables.id] });
-            toast.success("Registro actualizado correctamente");
+            appToast.success("Registro actualizado correctamente");
         },
         onError: (error) => {
-            toast.error(error instanceof Error ? error.message : "Error al actualizar registro");
+            appToast.error(error instanceof Error ? error.message : "Error al actualizar registro");
         },
     });
 }
